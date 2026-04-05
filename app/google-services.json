@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "876822810746",
+    "firebase_url": "https://thigki-default-rtdb.firebaseio.com",
+    "project_id": "thigki",
+    "storage_bucket": "thigki.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876822810746:android:bbbc05dfb63f2026b56bc3",
+        "android_client_info": {
+          "package_name": "com.example.thigki"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsM7ll4e16NsZvSnCrV_DV8ouWi9vUmCY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
