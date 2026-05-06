@@ -14,6 +14,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -162,6 +165,9 @@ fun AdminProductListScreen(
 @Composable
 fun UserProductListScreen(
     products: List<Product>,
+    cartCount: Int,
+    onAddToCart: (Product) -> Unit,
+    onCartClick: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -169,10 +175,38 @@ fun UserProductListScreen(
         modifier = modifier.fillMaxSize().background(BackgroundGrey),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("SHOP MUA SẮM", fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = Color.White) },
+                title = {
+                    Text(
+                        "☕ THIGKI COFFEE",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp,
+                        color = Color.White
+                    )
+                },
                 actions = {
+                    // Nút giỏ hàng với badge số lượng
+                    BadgedBox(
+                        badge = {
+                            if (cartCount > 0) {
+                                Badge { Text(cartCount.toString()) }
+                            }
+                        },
+                        modifier = Modifier.padding(end = 4.dp)
+                    ) {
+                        IconButton(onClick = onCartClick) {
+                            Icon(
+                                Icons.Default.ShoppingCart,
+                                contentDescription = "Giỏ hàng",
+                                tint = Color.White
+                            )
+                        }
+                    }
                     IconButton(onClick = onSignOut) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Đăng xuất", tint = Color.White)
+                        Icon(
+                            Icons.Default.ExitToApp,
+                            contentDescription = "Đăng xuất",
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -194,7 +228,7 @@ fun UserProductListScreen(
                 modifier = Modifier.padding(padding)
             ) {
                 items(products, key = { it.id }) { p ->
-                    UserProductItem(p)
+                    UserProductItem(p, onAddToCart = { onAddToCart(p) })
                 }
             }
         }
@@ -202,7 +236,7 @@ fun UserProductListScreen(
 }
 
 @Composable
-fun UserProductItem(p: Product) {
+fun UserProductItem(p: Product, onAddToCart: () -> Unit) {
     val formatter = DecimalFormat("#,###")
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -215,24 +249,44 @@ fun UserProductItem(p: Product) {
                 contentDescription = p.tenSanPham,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp),
+                    .height(140.dp),
                 contentScale = ContentScale.Crop
             )
-            Column(Modifier.padding(12.dp)) {
-                Text(p.tenSanPham, fontWeight = FontWeight.Bold, maxLines = 1, fontSize = 16.sp)
-                Text(p.loaiSanPham, fontSize = 12.sp, color = Color.Gray)
-                Spacer(Modifier.height(8.dp))
-                Surface(
-                    color = UserContainer,
-                    shape = RoundedCornerShape(8.dp)
+            Column(Modifier.padding(10.dp)) {
+                Text(
+                    p.tenSanPham,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    fontSize = 14.sp
+                )
+                Text(p.loaiSanPham, fontSize = 11.sp, color = Color.Gray)
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = " ${formatter.format(p.gia)} VNĐ ",
+                        text = "${formatter.format(p.gia)}đ",
                         color = UserPrimary,
                         fontWeight = FontWeight.Black,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(4.dp)
+                        fontSize = 13.sp,
                     )
+                    // Nút thêm vào giỏ
+                    Surface(
+                        onClick = onAddToCart,
+                        color = UserPrimary,
+                        shape = RoundedCornerShape(8.dp),
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Thêm vào giỏ",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .size(18.dp)
+                        )
+                    }
                 }
             }
         }

@@ -18,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.thigki.ui.AdminProductNavHost
+import com.example.thigki.ui.UserApp
 import com.example.thigki.ui.screens.LoginScreen
 import com.example.thigki.ui.screens.SignUpScreen
-import com.example.thigki.ui.screens.UserProductListScreen
 import com.example.thigki.ui.theme.ThiGKITheme
 import com.example.thigki.ui.viewmodel.AuthViewModel
+import com.example.thigki.ui.viewmodel.CartViewModel
+import com.example.thigki.ui.viewmodel.OrderViewModel
 import com.example.thigki.ui.viewmodel.ProductViewModel
 
 class MainActivity : ComponentActivity() {
@@ -35,15 +37,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // ViewModels – scoped tới Activity để chia sẻ state giữa các screen
                     val authViewModel: AuthViewModel = viewModel()
                     val productViewModel: ProductViewModel = viewModel()
-                    
+                    val cartViewModel: CartViewModel = viewModel()
+                    val orderViewModel: OrderViewModel = viewModel()
+
                     val user by authViewModel.currentUser.collectAsStateWithLifecycle()
                     val role by authViewModel.role.collectAsStateWithLifecycle()
                     val authMsg by authViewModel.uiMessage.collectAsStateWithLifecycle()
-                    val products by productViewModel.products.collectAsStateWithLifecycle()
 
-                    // State để chuyển đổi giữa Login và SignUp khi chưa đăng nhập
+                    // State chuyển đổi Login ↔ SignUp
                     var showSignUp by remember { mutableStateOf(false) }
 
                     when {
@@ -53,9 +57,9 @@ class MainActivity : ComponentActivity() {
                                 SignUpScreen(
                                     message = authMsg,
                                     onSignUp = { e, p -> authViewModel.signUp(e, p) },
-                                    onBack = { 
+                                    onBack = {
                                         showSignUp = false
-                                        authViewModel.clearMessage() 
+                                        authViewModel.clearMessage()
                                     },
                                     modifier = Modifier.fillMaxSize()
                                 )
@@ -63,7 +67,7 @@ class MainActivity : ComponentActivity() {
                                 LoginScreen(
                                     message = authMsg,
                                     onSignIn = { e, p -> authViewModel.signIn(e, p) },
-                                    onGoToSignUp = { 
+                                    onGoToSignUp = {
                                         showSignUp = true
                                         authViewModel.clearMessage()
                                     },
@@ -71,28 +75,30 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        
+
                         // 2. Đang tải quyền (Role)
                         role == null -> {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator()
                             }
                         }
-                        
-                        // 3. Là Admin
+
+                        // 3. Là Admin → luồng quản trị
                         role == "admin" -> {
                             AdminProductNavHost(
                                 productViewModel = productViewModel,
                                 authViewModel = authViewModel,
+                                orderViewModel = orderViewModel,
                             )
                         }
-                        
-                        // 4. Là User thường
+
+                        // 4. Là User → luồng đặt hàng
                         else -> {
-                            UserProductListScreen(
-                                products = products,
-                                onSignOut = { authViewModel.signOut() },
-                                modifier = Modifier.fillMaxSize(),
+                            UserApp(
+                                productViewModel = productViewModel,
+                                authViewModel = authViewModel,
+                                cartViewModel = cartViewModel,
+                                orderViewModel = orderViewModel,
                             )
                         }
                     }
